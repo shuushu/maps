@@ -45,218 +45,74 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from 'vue-property-decorator'
+    import { Component, Vue, Watch } from 'vue-property-decorator'
     import { mapState } from 'vuex'
-    import { rootState } from '@/ts.interface/store.ts'
+    import { RootState } from '@/ts.interface/store.ts'
+    import { TempStoreValue } from '@/ts.interface/components.ts'
+    import { TsGetWish } from '@/ts.interface/response/wish.ts'
 
-    import Nodata from "@/components/Nodata";
-    import ListCardHor from "@/components/ListCardHor";
-    import Title from "@/components/Title";
+
+    import Nodata from '@/components/Nodata.vue';
+    import ListCardHor from '@/components/ListCardHor.vue';
+    import Title from '@/components/Title.vue';
+
+    // Register the router hooks with their names
+    Component.registerHooks([
+	    'beforeRouteEnter',
+	    'beforeRouteLeave',
+	    'beforeRouteUpdate',
+    ])
+
+    interface RouterDetailProps {
+    	lat: number;
+    	lon: number;
+    	poi: number;
+    	distance?: string;
+    }
 
     @Component({
         components: { ListCardHor, Nodata, Title },
         computed: {
             ...mapState({
-                itemList: (state: rootState) => state.map.wishList,
-                option: (state: rootState) => state.map.wishOpt
-            })
-        },
-	    watch: {
-		    '$route' (to) {
-			    // 경로 변경에 반응하여...
-                if (to.query.page || to.query.key || to.query.sort) {
-	                this.layerReset();
-                	this.init()
-                }
-		    },
-	    },
-	    beforeRouteLeave(to, from, next) {
-		    this.layerReset();
-            next();
-        },
-	    beforeRouteEnter (to, from, next) {
-		    next(vm => vm.checkRouter(from));
-	    },
-        methods: {
-	        // router history check
-	        checkRouter(from) {
-		        if (from.name === 'detail') {
-			        this.$mapbox.maps.flyTo({ zoom: 14 });
-		        }
-	        },
-	        getAverageProps(type, data) {
-	        	let average = data.reviewAverage
-
-                if (average) {
-	                return average[type]
-                }
-	        },
-            // 리스트 > 아이콘클릭
-            move(data) {
-	            let value = {}
-
-	            if (data.type === 'click') {
-		            value.lat = data.features[0].geometry.coordinates[1];
-		            value.lon = data.features[0].geometry.coordinates[0];
-		            value.poi = data.features[0].properties.poi;
-
-	            } else {
-		            let { distance, poiId, navWgs84Lon, navWgs84Lat } = data;
-		            value.lon = navWgs84Lon;
-		            value.lat = navWgs84Lat;
-
-		            value.poi = poiId;
-                    value.distance = distance;
-	            }
-
-	            // 날아간다
-	            this.$mapbox.maps.flyTo({
-		            center: [ value.lon, value.lat ],
-		            speed: 10,
-		            zoom: 17
-	            });
-
-	            // poi 상세 정보
-	            this.$router.push({
-		            name: 'detail',
-		            params: value
-	            });
-            },
-	        remove(item) {
-	        	let type = this.$route.name;
-	        	let poi = item.poiId, str = '';
-
-	        	if (type === 'wish') {
-	        		str = '가고싶어요'
-                } else {
-	        		str = '갔다왔어요';
-                }
-
-		        this.$store.commit('SET_CONFIRM', {
-			        title: `${str} 삭제`,
-			        templet: `나의 ${str} 목록에서 <span style="color: indianred">"${item.displayName}"</span>을 정말 삭제하시겠습니까?`,
-			        flag: true,
-                    func: () => {
-			        	if (type === 'wish') {
-			        		this.$axios.deleteWish(poi).then(() => {
-						        this.$store.dispatch('ALERT', {
-							        color: 'warning',
-							        icon: 'check_circle',
-							        msg: `갔다왔어요 삭제 완료`,
-						        });
-						        this.layerReset();
-						        this.init()
-                            })
-                        } else {
-
-                        }
-                    }
-		        })
-            },
-            layerReset(params) {
-	        	let keyValue = params || this.$route.name;
-	        	let name = keyValue.toLocaleUpperCase();
-
-	            if (this.poiStore[name]) {
-		            this.poiStore[name].forEach((ID: string) => {
-			            this.$mapbox.clearMapLayer(ID)
-			            this.$mapbox.maps.off('click', ID, this.move)
-		            })
-                }
-	            this.$mapbox.clearMapLayer('click')
-            },
-            init() {
-	        	let key = this.$route.name;
-	        	    key = key.toLocaleUpperCase();
-	        	let sortValue = this.$route.query.sort || 'DATE'
-
-	            // 라우터 쿼리에 CMN값이 있을때 (타인의 가고싶어요)
-	            let cmnKey = this.$route.query.key;
-	            let params = {
-		            gpsLat: 37.500084,
-		            gpsLon: 127.003306,
-		            page: Number(this.$route.query.page) || 1,
-		            size: 10,
-	            };
-
-	            // 위시랑 리뷰 요청 파라미터가 달라서.. 왜다름.??
-	            if (key === 'REVIEWS') {
-		            params.sortType =  sortValue;
-                } else {
-	            	params.sort = sortValue
-                }
-
-
-	            // url에 CMN값이 있을때
-	            if (cmnKey) {
-		            params.targetCmn = cmnKey;
-	            }
-
-	            this.$run(`map/GET_${key}`, params).then((res: any) => {
-	            	let params, temp;
-
-	            	if (key === 'REVIEWS') {
-	            		params = []
-                    } else {
-	            		params = res.content;
-                    }
-
-		            // 컬렉션 저장~
-		            this.poiStore[key] = [];
-		            res.content.forEach(item => {
-			            let ID;
-
-			            if (key === 'REVIEWS') {
-				            ID = `${key}_${item.review.poiId}`
-				            params.push(item.poi)
-                        } else {
-			            	ID = `${key}_${item.poiId}`
-                        }
-			            // 중복이 있는건 제외
-			            if (temp === ID) {
-			               return false;
-			            }
-
-			            temp = ID
-			            this.poiStore[key].push(ID)
-                        this.$mapbox.maps.on('click', ID, this.move);
-		            });
-
-
-
-		            // 구성품만들기
-		            let geoJson = this.$mapbox.createFeature({
-			            prefix: key,
-			            content: params
-		            });
-
-		            // 레이어그리기
-		            this.$mapbox.createLayer(geoJson, (layer) => {
-			            layer.layout['icon-size'] = 0.3;
-		            })
-	            })
-            }
+                itemList: (state: RootState) => state.map.wishList,
+            }),
         },
         data() {
         	return {
-		        poiStore: {}
+		        poiStore: {},
             }
         },
-	    created() {
-        	if (this.$route.name != 'subdescript') {
-		        this.init();
-            }
-	    }
     })
 
     export default class Wish extends Vue {
+    	public itemList: RootState['map']['wishList']['content'];
         public optlist: string[] = ['이름순', '거리순', '날짜순'];
+	    public poiStore: TempStoreValue; // mapLayer 임시 ID저장
+	    @Watch('$route')
+	    public routeUpdate() {
+		    const { page, key, sort } = this.$route.query
+
+		    if (page || key || sort) {
+			    this.layerReset();
+			    this.init()
+		    }
+	    }
+
+	    public beforeRouteLeave(to: any, from: any, next: any) {
+		    this.layerReset();
+		    next();
+	    }
+	    public beforeRouteEnter(to: any, from: any, next: any) {
+		    next((vm: any) => {
+			    vm.checkRouter(from)
+		    });
+	    }
 
         // wish에 parameter가 존재할 경우
-	    public setRouterParams (params) {
-		    let data = {
+	    public setRouterParams(params: { id: string, value: any }) {
+		    const data: { name: string; query: any } = {
 			    name: this.$route.name,
-                query: {}
+                query: {},
 		    };
 
 		    // 다른유저의 가고싶어요
@@ -279,23 +135,22 @@
 		    return data
         }
 
-
         // PageBtn
         get paging() {
             return Number(this.$route.query.page) || 1
         }
         set paging(val: any) {
-        	let params = this.setRouterParams({
+        	const params = this.setRouterParams({
                 id: 'page',
-		        value: val
+		        value: val,
             });
         	this.layerReset();
 	        this.$router.push(params)
         }
 
         get sort() {
-            let temp = '';
-            switch (this.option.sort) {
+            let temp: string = '';
+            switch (this.$route.query.sort) {
                 case 'DATE': temp = '날짜순';
                     break;
 
@@ -311,7 +166,7 @@
         }
         set sort(str: string) {
 	        if (this.itemList.content.length > 0) {
-                let temp: any = '';
+                let temp: string = '';
 
                 switch (str) {
                     case '날짜순': temp = 'DATE';
@@ -325,16 +180,193 @@
 
                 }
 
-                let params = this.setRouterParams({
+                const params = this.setRouterParams({
                     id: 'sort',
-                    value: temp
+                    value: temp,
                 });
 
                 this.layerReset();
                 this.$router.push(params)
 	        }
         }
-        //public async init(params?: false): Promise<void> {}
+        // public async init(params?: false): Promise<void> {}
+
+	    // router history check
+	    public checkRouter(from: any) {
+		    if (from.name === 'detail') {
+			    this.$mapbox.maps.flyTo({ zoom: 14 });
+		    }
+	    }
+	    public getAverageProps(type: string, data: TsGetWish) {
+		    const average = data.reviewAverage
+
+		    if (average) {
+			    return average[type]
+		    }
+	    }
+	    // 리스트 > 아이콘클릭
+	    public move(data: any) {
+		    const value: RouterDetailProps = {
+		    	lat: 0,
+                lon: 0,
+                poi: 0,
+            }
+
+            let dv = '';
+
+		    if (data.type === 'click') {
+			    value.lat = data.features[0].geometry.coordinates[1];
+			    value.lon = data.features[0].geometry.coordinates[0];
+			    value.poi = data.features[0].properties.poi;
+
+		    } else {
+			    const { distance, poiId, navWgs84Lon, navWgs84Lat } = data;
+
+			    value.lon = navWgs84Lon;
+			    value.lat = navWgs84Lat;
+
+			    value.poi = poiId;
+			    dv = distance;
+		    }
+
+		    // 날아간다
+		    this.$mapbox.maps.flyTo({
+			    center: [ value.lon, value.lat ],
+			    speed: 10,
+			    zoom: 17,
+		    });
+
+		    // poi 상세 정보
+		    this.$router.push({
+			    name: 'detail',
+			    params: {
+				    lat: String(value.lat),
+                    lon: String(value.lon),
+                    poi: String(value.poi),
+                    distance: dv,
+                },
+		    });
+	    }
+	    public remove(item: TsGetWish) {
+		    const type = this.$route.name;
+		    const poi = item.poiId;
+		    let str = '';
+
+		    if (type === 'wish') {
+			    str = '가고싶어요'
+		    } else {
+			    str = '갔다왔어요';
+		    }
+
+		    this.$store.commit('SET_CONFIRM', {
+			    title: `${str} 삭제`,
+			    templet: `나의 ${str} 목록에서 <span style="color: indianred">"${item.displayName}"</span>을 정말 삭제하시겠습니까?`,
+			    flag: true,
+			    func: () => {
+				    if (type === 'wish') {
+					    this.$axios.deleteWish(poi).then(() => {
+						    this.$store.dispatch('ALERT', {
+							    color: 'warning',
+							    icon: 'check_circle',
+							    msg: `갔다왔어요 삭제 완료`,
+						    });
+						    this.layerReset();
+						    this.init()
+					    })
+				    }
+			    },
+		    })
+	    }
+
+	    public layerReset() {
+		    const keyValue = this.$route.name;
+		    const name = keyValue.toLocaleUpperCase();
+
+		    if (this.poiStore[name]) {
+			    this.poiStore[name].forEach((ID: string) => {
+				    this.$mapbox.clearMapLayer(ID)
+				    this.$mapbox.maps.off('click', ID, this.move)
+			    })
+		    }
+		    this.$mapbox.clearMapLayer('click')
+	    }
+
+	    public init() {
+		    let key = this.$route.name;
+		    const sortValue = this.$route.query.sort || 'DATE'
+		    // 라우터 쿼리에 CMN값이 있을때 (타인의 가고싶어요)
+		    const cmnKey = this.$route.query.key;
+		    const params: any = {
+			    gpsLat: 37.500084,
+			    gpsLon: 127.003306,
+			    page: Number(this.$route.query.page) || 1,
+			    size: 10,
+		    };
+
+		    key = key.toLocaleUpperCase();
+
+		    // 위시랑 리뷰 요청 파라미터가 달라서.. 왜다름.??
+		    if (key === 'REVIEWS') {
+			    params.sortType =  sortValue;
+		    } else {
+			    params.sort = sortValue
+		    }
+
+
+		    // url에 CMN값이 있을때
+		    if (cmnKey) {
+			    params.targetCmn = cmnKey;
+		    }
+
+		    this.$run(`map/GET_${key}`, params).then((res: any) => {
+			    let params;
+			    let temp: string;
+
+			    if (key === 'REVIEWS') {
+				    params = []
+			    } else {
+				    params = res.content;
+			    }
+
+			    // 컬렉션 저장~
+			    this.poiStore[key] = [];
+			    res.content.forEach((item: any) => {
+				    let ID;
+
+				    if (key === 'REVIEWS') {
+					    ID = `${key}_${item.review.poiId}`
+					    params.push(item.poi)
+				    } else {
+					    ID = `${key}_${item.poiId}`
+				    }
+				    // 중복이 있는건 제외
+				    if (temp === ID) {
+					    return false;
+				    }
+
+				    temp = ID
+				    this.poiStore[key].push(ID)
+				    this.$mapbox.maps.on('click', ID, this.move);
+			    });
+
+
+			    // 구성품만들기
+			    const geoJson = this.$mapbox.createFeature({
+				    prefix: key,
+				    content: params,
+			    });
+
+			    // 레이어그리기
+			    this.$mapbox.createLayer(geoJson, (layer: any) => {
+				    layer.layout['icon-size'] = 0.3;
+			    })
+		    })
+	    }
+	    public created() {
+		    if (this.$route.name !== 'subdescript') {
+			    this.init();
+		    }
+	    }
     }
 </script>
 

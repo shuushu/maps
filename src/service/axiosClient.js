@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import axios from 'axios';
 const instance = axios.create({
-    timeout: 5000
+    timeout: 5000,
 });
 instance.interceptors.response.use((response) => {
     const { data = {} } = response;
@@ -14,7 +14,8 @@ instance.interceptors.response.use((response) => {
         return null;
     }
 }, (error) => {
-    return null;
+    $axios.$emit('error', error.response.data);
+    return false;
 });
 const $axios = new Vue({
     data: {

@@ -1,6 +1,6 @@
 <template>
     <div class="reviewRating">
-        <div v-if="reviewAveragePoint">
+        <div v-if="reviewAveragePoint > 0">
             <div class="avg">
                 <span :class="`review ${reviewAverageCode}`">{{ reviewAverageName }}</span>
                 <v-rating
@@ -48,40 +48,37 @@
         props: {
             goodCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             greatCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             poorCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             reviewAverageCode: {
-                type: String | null,
-                default: null
+                type: String,
+                default: '',
             },
             reviewAverageName: {
-                type: String | null,
-                default: null
+                type: String,
+                default: '',
             },
             reviewAveragePoint: {
-                type: Number | null,
-                default: null
+                type: Number,
+                default: 0,
             },
             reviewCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             sosoCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
         },
-        methods: {
-
-        }
     }
 </script>
 

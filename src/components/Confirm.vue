@@ -17,15 +17,15 @@ export default {
     props: {
         title: {
             type: String,
-            default: '제목'
+            default: '제목',
         },
         flag: {
             type: Boolean,
-            default: false
+            default: false,
         },
         templet: {
             type: String,
-            default: '<strong>V-html</strong>내용입니다.'
+            default: '<strong>V-html</strong>내용입니다.',
         },
     },
 	methods: {
@@ -34,8 +34,8 @@ export default {
 		},
 		handleCancel(f) {
             this.$emit('handleCancel', f)
-		}
-	}
+		},
+	},
 }
 </script>
 

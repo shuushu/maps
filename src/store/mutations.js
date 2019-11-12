@@ -22,7 +22,7 @@ const mutations = {
     },
     MY_COLLECTIONS(state, payload) {
         state.myCollections = payload;
-    }
+    },
 };
 export default mutations;
 //# sourceMappingURL=mutations.js.map

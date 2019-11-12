@@ -1,7 +1,7 @@
 import { MutationTree } from 'vuex'
-import { tsMapState } from "@/ts.interface/store";
+import { TsMapState } from '@/ts.interface/store'
 
-const mutations: MutationTree<tsMapState> = {
+const mutations: MutationTree<TsMapState> = {
 	// 나의구독리스트 > POI 정보
 	MY_WISH: (state, payload) => {
         state.myWish = payload

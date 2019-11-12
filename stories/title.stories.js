@@ -4,6 +4,7 @@ import Title from '../src/components/Title.vue';
 import Flag from '../src/components/Flag.vue';
 import MapPOP from '../src/components/MapPOP.vue';
 import Confirm from '../src/components/Confirm.vue';
+import swipeTest from '../src/components/swipe_test.vue';
 
 import {boolean, withKnobs} from "@storybook/addon-knobs/dist/index";
 import { action } from "@storybook/addon-actions/dist/index";
@@ -36,6 +37,17 @@ stories
         methods: {
             clickHeart: action('가고싶어요 등록/key'),
             clickFlag: action('갔다왔어요 등록/key'),
+        },
+        data() {
+            return {
+                data: [ { eventBus: 'shushu' }]
+            }
+        }
+    }))
+    .add('swipeTest', () => ({
+        components: { swipeTest },
+        template: `<swipeTest />`,
+        methods: {
         },
         data() {
             return {

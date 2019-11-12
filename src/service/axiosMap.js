@@ -24,7 +24,7 @@ export default {
     // POI 상세속성조회(더보기)
     detailPOImore(params) {
         const { poi } = params;
-        return $axios.get(`/map/v1/pois/${poi}/attr`, params);
+        return $axios.get(`/map/v1/pois/${poi}/attr`, params) || true;
     },
     // 상세
     clickPoiDetail(params) {
@@ -44,37 +44,33 @@ export default {
             return $axios.get(`/map/v1/wishes/${data.targetCmn}`, {
                 params: {
                     data,
-                    'x-skcomms-cmn': data.targetCmn
-                }
+                    'x-skcomms-cmn': data.targetCmn,
+                },
             });
         }
         else {
-            return $axios.get(`/map/v1/wishes`, data);
+            return $axios.get(`/map/v1/wishes`, { params: data });
         }
     },
     // 등록
     addWish(poi) {
         return $axios.post(`/map/v1/wishes/${poi}`, {
-            poiId: poi
+            poiId: poi,
         });
     },
     // 삭제
     deleteWish(poi) {
         return $axios.delete(`/map/v1/wishes/${poi}`, {
-            poiId: poi
+            poiId: poi,
         });
     },
     /*
      * 구독
      */
-    // 추천리스트
-    getRecommendation(params) {
-        return $axios.get(`/map/v1/wishes`, params);
-    },
     // 신청
     joinSubscript(cmn) {
         return $axios.post(`/user/v1/subscription`, {
-            friendCmn: cmn
+            friendCmn: cmn,
         });
     },
     // 멤버 가져오기
@@ -107,21 +103,6 @@ export default {
             return $axios.get(`/map/v1/reviews`, data);
         }
     },
-    // 리뷰 좋아요
-    reviewLike(data) {
-        const { poiId, reviewId } = data;
-        return $axios.post(`/map/v1/pois/${poiId}/reviews/${reviewId}/like`, data);
-    },
-    // 리뷰 좋아요 취소
-    reviewLikeDel(data) {
-        const { poiId, reviewId } = data;
-        return $axios.delete(`/map/v1/pois/${poiId}/reviews/${reviewId}/like`, data);
-    },
-    // 리뷰 좋아요 사용자 리스트
-    reviewLikeList(data) {
-        const { poiId, reviewId } = data;
-        return $axios.get(`/map/v1/pois/${poiId}/reviews/${reviewId}/likes`, data);
-    },
     // 공지사항
     getBoardList(data) {
         const { boardName, osType } = data;
@@ -130,6 +111,6 @@ export default {
     getBoardDetail(data) {
         const { boardName, id } = data;
         return $axios.get(`/bizcommon/v1/${boardName}/${id}`, data);
-    }
+    },
 };
 //# sourceMappingURL=axiosMap.js.map

@@ -3,7 +3,7 @@
         <Title>사용자정보</Title>
         <div class="userDetail" v-if="userInfoValue">
             <div class="character">
-                <img :src="setCharacter" alt="">
+                <img :src="setCharacter()" alt="">
             </div>
 
 
@@ -12,9 +12,9 @@
                     LV {{ userInfoValue.level }}
                 </span>
                 <span class="infos right">
-                    다음 레벨까지 {{ totalXp }}Xp
+                    다음 레벨까지 {{ totalXp() }}Xp
                 </span>
-                <v-progress-linear color="blue" :value="currentXp"></v-progress-linear>
+                <v-progress-linear color="blue" :value="currentXp()"></v-progress-linear>
                 <div class="types">
                     <v-chip label  color="red lighten-1" text-color="white">
                         {{ userInfoValue.recommendIntro }} / {{ userInfoValue.recommendType }}
@@ -34,11 +34,11 @@
        
 
             <div class="state">
-                <v-btn block class="item" @click="goLink('wish')">
+                <v-btn block class="item" @click="goLink('wish', userInfoValue.cmn)">
                     <v-icon color="gray lighten-1" >mdi-heart</v-icon>
                     <div class="txt">가고싶어요 {{ userInfoValue.wishCount }}</div>
                 </v-btn>
-                <v-btn block class="item" @click="goLink('reviews')">
+                <v-btn block class="item" @click="goLink('reviews', userInfoValue.cmn)">
                     <v-icon color="gray lighten-1" >mdi-flag-variant-outline</v-icon>
                     <div class="txt">갔다왔어요 {{ userInfoValue.reviewCount }}</div>
                 </v-btn>
@@ -55,74 +55,58 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { mapState } from 'vuex'
 
-import Title from "@/components/Title";
+import Title from '@/components/Title.vue';
+import { RootState } from '@/ts.interface/store';
+import { UserTargetProfileDto } from '@/ts.interface/response/subscription';
+import { TsGetCharacters } from '@/ts.interface/response/biz';
 
 @Component({
 	components: { Title },
 	computed: {
 		...mapState({
-			characters: (state: rootState) => state.characters,
-			myCollections: (state: rootState) => state.myCollections,
+			characters: (state: RootState) => state.characters,
+			myCollections: (state: RootState) => state.myCollections,
 		}),
-        currentXp() {
-			return parseInt((this.userInfoValue.point/this.totalXp)*100)
-        },
-        totalXp() {
-			return this.userInfoValue.point + this.userInfoValue.remainingPoint
-        },
-		setCharacter() {
-			const KEY = this.userInfoValue.characterId;
-			return `https://thumbdev.oditto.com/image/${this.characters[KEY].webpMotion1}`
-		},
-	},
-	methods: {
-		goLink(path) {
-			let data = {
-				name: path,
-				query: {
-					key: this.userInfoValue.cmn
-				}
-            }
-
-            if (path === 'subdescript') {
-				data.query['nick'] = this.userInfoValue.nickname
-            }
-
-			this.$router.push(data)
-        },
-		// router history check
-		checkRouter(from) {
-			if (from.name != 'subdescript') {
-				//this.$router.push({ name: 'subdescript' })
-			}
-		},
-	},
-	beforeRouteEnter (to, from, next) {
-		next(vm => vm.checkRouter(from));
 	},
 })
 
 export default class Recommend extends Vue {
-	userInfoValue = null;
+	public characters: RootState['characters'];
+	public userInfoValue: any = false;
 
     public created() {
         const { cmn } = this.$route.params;
 
         if (cmn) {
-	        this.$axios.getUserInfo(cmn).then(data => {
+	        this.$axios.getUserInfo(cmn).then((data: UserTargetProfileDto) => {
         		if (data) {
         			this.userInfoValue = data
-                } else {
-			        this.$store.dispatch('ALERT', {
-				        color: 'red',
-				        icon: 'error',
-				        msg: '유저 정보 가져오기 실패',
-			        })
                 }
-
             })
         }
     }
+	public currentXp() {
+    	if (this.userInfoValue) {
+		    return (this.userInfoValue.point / this.totalXp()) * 100
+        }
+	}
+	public totalXp() {
+    	if (this.userInfoValue) {
+		    return this.userInfoValue.point + this.userInfoValue.remainingPoint
+        }
+	}
+	public setCharacter() {
+		const KEY = this.userInfoValue.characterId;
+		return `https://thumbdev.oditto.com/image/${this.characters[KEY].webpMotion1}`
+	}
+	private goLink(path: string, key: string) {
+		const data = {
+			name: path,
+			query: { key },
+		};
+
+		this.$router.push(data)
+	}
 }
 </script>
 

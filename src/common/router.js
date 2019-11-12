@@ -17,14 +17,7 @@ const routerMap = [
         ],
     },
     { name: 'wish', path: '/wish', component: '/Wish' },
-    { name: 'reviews', path: '/reviews', component: '/ReviewList', children: [
-            {
-                name: 'likelist',
-                path: 'likelist',
-                component: () => import('@/container/LikeList.vue'),
-            },
-        ]
-    },
+    { name: 'reviews', path: '/reviews', component: '/ReviewList' },
     { name: 'board', path: '/board', component: '/Board', children: [
             {
                 name: 'boardlist',
@@ -33,19 +26,19 @@ const routerMap = [
                 props: (route) => ({ boardName: route.params.name }),
             },
             {
-                name: 'boarddetail',
+                name: 'boardDetail',
                 path: '/board/:name/:id',
                 component: () => import(/* webpackChunkName: "components" */ '@/components/BoardDetail.vue'),
                 props: (route) => ({ boardName: route.params.name, detailId: route.params.id }),
             },
-        ]
+        ],
     },
     { name: 'sss', path: '/sss', redirect: { name: 'subdescript' } },
     { name: 'home', path: '/home', component: '/Home' },
 ];
 const redirectRoute = [
     { path: '/', name: 'root', redirect: { name: 'subdescript' } },
-    { path: "*", redirect: { name: 'subdescript' } }
+    { path: '*', redirect: { name: 'subdescript' } },
 ];
 const routes = [...routerMap.map((route) => {
         const { name, path, component, children, redirect } = route;

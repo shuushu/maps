@@ -13,14 +13,14 @@ export default {
 	props: {
 		msg: {
 		    type: String,
-            default: 'No-data'
-        }
+            default: 'No-data',
+        },
 	},
     methods: {
-        onClick(e) {
-            this.$emit('click', ['shushu','daeun']);
+        onClick() {
+            this.$emit('click', ['shushu', 'daeun']);
         },
-    }
+    },
 }
 </script>
 

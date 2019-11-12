@@ -4,10 +4,10 @@
             <h3 class="tit">
                 {{ displayName }}
                 <span class="cate">{{ categoryDisplayName }}</span>
-                <span v-if="distance" class="distance">{{ distance }}</span>
+                <span v-if="distance.length > 0" class="distance">{{ distance }}</span>
             </h3>
 
-            <ShowReviewState v-if="reviewStateValue" v-bind="reviewStateValue" />
+            <ShowReviewState v-if="Object.keys(reviewStateValue).length > 0" v-bind="reviewStateValue" />
 
             <Flag :review="reviewCount" :wish="wishCount" />
             <p class="activityMiniMsg">
@@ -27,8 +27,8 @@
             </div>
 
             <!-- MORE -->
-            <div :class="show ? 'storeInfo strech' : 'storeInfo'" v-if="moreDetail">
-                <div class="subAttr-list-wrap" v-for="i in moreDetail">
+            <div :class="show ? 'storeInfo strech' : 'storeInfo'" v-if="moreDetail.length > 0">
+                <div class="subAttr-list-wrap" v-for="(i, idx) in moreDetail" :key="`items-${idx}`">
                     <span class="codeName">{{ i.codeName }}</span>
                     <span class="subAttr-list-cont" v-html="i.attrValue" />
                 </div>
@@ -46,7 +46,7 @@
 
 <script>
 import Flag from './Flag.vue'
-import ShowReviewState from "./ShowReviewState";
+import ShowReviewState from './ShowReviewState';
 
 export default {
     name: 'DetailPOI',
@@ -54,54 +54,54 @@ export default {
     props: {
         displayName: {
             type: String,
-            default: '가게이름'
+            default: '가게이름',
         },
         categoryDisplayName: {
             type: String,
-            default: '맛집'
+            default: '맛집',
         },
         reviewCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         wishCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         newAddress: {
             type: String,
-            default: '인천 중구 숲쟁이로'
+            default: '인천 중구 숲쟁이로',
         },
         address: {
             type: String,
-            default: '구) 인천 중구 운남동 1640-82'
+            default: '구) 인천 중구 운남동 1640-82',
         },
         phoneNumber: {
             type: String,
-            default: '032-000-0000'
+            default: '032-000-0000',
         },
         activityMiniMsg: {
             type: String,
-            default: '나의 관심장소'
+            default: '나의 관심장소',
         },
         distance: {
-            type: String | Boolean,
-            default: false
+            type: String,
+            default: '',
         },
         moreDetail: {
-            type: Boolean | Array,
-            default: false
+            type: Array,
+            default: [],
         },
         reviewStateValue: {
-            type: Object | null,
-            default: null
-        }
+            type: Object,
+            default: {},
+        },
     },
     data() {
         return {
-            show: true
+            show: true,
         }
-    }
+    },
 }
 </script>
 

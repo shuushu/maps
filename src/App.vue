@@ -22,38 +22,7 @@
                 <router-link class="logo" to="/">어디가지또</router-link>
             </div>
         </header>
-        <aside id="aside">
-            <div class="list">
-                <v-btn to="/wish?page=1" flat icon color="red lighten-2" exact>
-                    <v-icon>favorite</v-icon>
-                    <span class="btn-label">가고싶어요</span>
-                </v-btn>
-            </div>
-            <div class="list">
-                <v-btn to="/reviews?page=1" flat icon color="pink lighten-2" exact>
-                    <v-icon>check_circle</v-icon>
-                    <span class="btn-label">갔다왔어요</span>
-                </v-btn>
-            </div>
-            <div class="list">
-                <v-btn to="/subdescript" flat icon color="purple lighten-2">
-                    <v-icon>star</v-icon>
-                    <span class="btn-label">구독멤버</span>
-                </v-btn>
-            </div>
-            <div class="list">
-                <v-btn to="/board/notice" flat icon color="blue lighten-2" exact>
-                    <v-icon>dashboard</v-icon>
-                    <span class="btn-label">공지사항</span>
-                </v-btn>
-            </div>
-            <div class="list">
-                <v-btn to="/board/faq" flat icon color="gray lighten-2" exact>
-                    <v-icon>help</v-icon>
-                    <span class="btn-label">도움말</span>
-                </v-btn>
-            </div>
-        </aside>
+        <SideNav />
         <article id="contents">
             <div class="wrap">
                 <router-view />
@@ -63,6 +32,8 @@
                 <p class="text">데이터 로딩중</p>
             </div>
         </article>
+
+
         <div id="mapwrap">
             <div id="map"></div>
         </div>
@@ -73,22 +44,32 @@
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
     import { mapActions, mapState } from 'vuex'
-    import { rootState, tsCharacters } from '@/ts.interface/store.ts'
-    import { mapAPI } from '@/common/map.ts'
-    import Confirm from "./components/Confirm";
-
+    import { RootState, TsCharacters } from '@/ts.interface/store.ts'
+    import { MapAPI } from '@/common/map.ts'
+    // components
+    import Confirm from '@/components/Confirm.vue'
+    import SideNav from '@/components/SideNav.vue';
     // 팝업 이벤트버스
     import bus from '@/service/axiosClient'
-
+    // CSS
     import 'mapbox-gl/dist/mapbox-gl.css'
 
+    interface ErrorState {
+	    debug: string;
+	    error: string;
+	    errorCode: string;
+	    message: string;
+	    request: string;
+	    timestamp: string;
+    }
+
     @Component({
-	    components: { Confirm },
+	    components: { SideNav, Confirm },
 	    computed: {
             ...mapState({
-                isAlert: (state: rootState) => state.isAlert,
-                isLoading: (state: rootState) => state.isLoading,
-	            confirm: (state: rootState) => state.confirm,
+                isAlert: (state: RootState) => state.isAlert,
+                isLoading: (state: RootState) => state.isLoading,
+	            confirm: (state: RootState) => state.confirm,
 
             }),
         },
@@ -96,70 +77,76 @@
             ...mapActions({
                 alert: 'ALERT',
             }),
-	        handlceConfirm() {
-            	// 컨펌창 완료 시 팝업을 지우고, 레이어도 지운다.
-                this.confirm.func()
-                this.handleCancel()
-		        /*this.$run('map/SAVE_WISH', v.data).then(res => {
-			        if (res) {
-				        this.$mapbox.popup.remove();
-				        this.$store.commit('SET_CONFIRM', {
-					        title: '',
-					        flag: false,
-					        templet: ''
-				        })
-			        }
-		        })*/
-            },
-	        handleCancel() {
-		        this.$store.commit('SET_CONFIRM', {
-			        title: '',
-			        flag: false,
-			        templet: ''
-		        })
-            },
         },
-        mounted() {
-	        let maps = new mapAPI().init(document.getElementById('map'));
-
-	        maps.on('click', (e) => {
-		        this.$mapbox.clickPOI(e, this)
-	        });
-        },
-        created() {
-	    	this.$axios.getCharacters().then((res: tsCharacters) => {
-			    let temp = {}
-
-			    res.map((i:tsCharacters) => {
-	    			temp[i.characterId] = i
-                })
-
-                this.$store.commit('SET_CHARACTER', temp)
-            })
-
-
-	        // 맵레이어 팝업 가고싶어요/갔다왔어요 클릭 이벤트
-	        bus.$on('clickHeart', data => {
-	        	let { displayName, categoryDisplayName, poi } = data;
-
-		        this.$store.commit('SET_CONFIRM', {
-			        title: '가고싶어요 등록 확인',
-			        flag: true,
-			        templet: `<em>[${categoryDisplayName}]</em><strong class="purple--text text--lighten-2">${displayName}</strong> 이장소를 가고싶어요 목록에 추가할까요?`,
-                    func: () => {
-	                    this.$axios.addWish(poi).then(res => {
-		                    this.$store.dispatch('ALERT', {
-			                    color: 'warning',
-			                    icon: 'check_circle',
-			                    msg: `가고싶어요에 등록 완료`,
-		                    });
-                        });
-                    }
-		        })
-            });
-        }
     })
-    export default class App extends Vue {}
+    export default class App extends Vue {
+	    public confirm: RootState['confirm'];
+
+
+	    public handlceConfirm() {
+		    // 컨펌창 완료 시 팝업을 지우고, 레이어도 지운다.
+		    this.confirm.func()
+		    this.handleCancel()
+	    }
+
+	    public handleCancel() {
+		    this.$store.commit('SET_CONFIRM', {
+			    title: '',
+			    flag: false,
+			    templet: '',
+		    })
+	    }
+
+	    public mounted() {
+		    const maps = new MapAPI().init(document.getElementById('map'));
+
+		    maps.on('click', (e: any) => {
+			    this.$mapbox.clickPOI(e, this)
+		    });
+	    }
+
+	    public created() {
+		    this.$axios.getCharacters().then((res: TsCharacters []) => {
+			    const temp: any = {}
+
+			    res.map((i: TsCharacters) => {
+				    temp[i.characterId] = i
+			    })
+
+			    this.$store.commit('SET_CHARACTER', temp)
+		    })
+
+
+		    // 맵레이어 팝업 가고싶어요/갔다왔어요 클릭 이벤트
+		    bus.$on('clickHeart', (data: any) => {
+			    const { displayName, categoryDisplayName, poi } = data;
+
+			    this.$store.commit('SET_CONFIRM', {
+				    title: '가고싶어요 등록 확인',
+				    flag: true,
+				    templet: `<em>[${categoryDisplayName}]</em><strong class="purple--text text--lighten-2">${displayName}</strong> 이장소를 가고싶어요 목록에 추가할까요?`,
+				    func: () => {
+					    this.$axios.addWish(poi).then(() => {
+						    this.$store.dispatch('ALERT', {
+							    color: 'warning',
+							    icon: 'check_circle',
+							    msg: `가고싶어요에 등록 완료`,
+						    });
+					    });
+				    },
+			    })
+		    });
+		    // axios Error 핸들링
+		    bus.$on('error', (err: ErrorState) => {
+			    this.$store.dispatch('ALERT', {
+				    color: 'white',
+				    icon: 'priority_high',
+				    msg: err.message,
+			    });
+            })
+	    }
+    }
+
 </script>
 
 <style lang="scss">
@@ -230,33 +217,6 @@
         top: $header-height;
     }
 
-    #aside{
-        position: relative;
-        z-index: 11;
-        width: 80px;
-        margin-top: $header-height;
-        border-right: 1px solid #ccc;
-        background-color: #fff;
-        text-align: center;
-        .list{
-            padding: 0 15px ;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 20px;
-        }
-        .v-btn__content{
-            width: 50px;
-        }
-        .btn-label{
-            position: absolute;
-            font-size: 12px;
-            margin-top: 23px;
-        }
-        .v-btn--active .btn-label{
-            font-weight: bold;
-            text-decoration: underline;
-        }
-
-    }
     #contents{
         width: 300px;
         margin-top: $header-height;

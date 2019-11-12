@@ -12,13 +12,13 @@
         props: {
             tit: {
                 type: String,
-                default: 'Title Value'
+                default: 'Title Value',
             },
             count: {
                 type: Number,
-                default: 0
-            }
-        }
+                default: 0,
+            },
+        },
     }
 </script>
 

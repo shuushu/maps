@@ -21,29 +21,29 @@ export default {
     props: {
         categoryDisplayName: {
             type: String,
-            default: '분류'
+            default: '분류',
         },
         displayName: {
             type: String,
-            default: '가게이름'
+            default: '가게이름',
         },
         reviewAverageCode: {
             type: String,
-            default: ''
+            default: '',
         },
         reviewAverageName: {
             type: String,
-            default: ''
+            default: '',
         },
         newAddress: {
             type: String,
-            default: '인천 중구 숲쟁이로'
+            default: '인천 중구 숲쟁이로',
         },
         phoneNumber: {
             type: String,
-            default: ''
-        }
-    }
+            default: '',
+        },
+    },
 }
 </script>
 

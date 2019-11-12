@@ -11,7 +11,7 @@
         </div>
         <div class="review-list-wrap">
             <div v-if="itemList.content.length > 0">
-                <ListCardHor  v-for="(item, index) in review" :key="`${item.poiId}_${index}`" v-bind="item">
+                <ListCardHor  v-for="(item, index) in review()" :key="`${item.poiId}_${index}`" v-bind="item">
                     <span class="history">[{{ item.history }}]</span>
                     <span>{{ item.content }}</span>
                     <div class="pink--text text--lighten-3" v-if="item.like > 0">{{ item.like }}명이 좋아합니다.</div>
@@ -42,47 +42,47 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue } from "vue-property-decorator"
+    import { Component, Vue } from 'vue-property-decorator'
     import { mapState } from 'vuex'
-    import { rootState } from '@/ts.interface/store.ts'
+    import { RootState } from '@/ts.interface/store.ts'
+    import { ReviewDto } from '@/ts.interface/response/wish.ts'
 
-    import ListCardHor from "@/components/ListCardHor"
-    import Nodata from '@/components/Nodata'
-    import Title from "@/components/Title";
-    import Wish from "./Wish";
-
+    import ListCardHor from '@/components/ListCardHor.vue'
+    import Nodata from '@/components/Nodata.vue'
+    import Title from '@/components/Title.vue';
+    import Wish from '@/container/Wish.vue';
 
     @Component({
         extends: Wish,
         components: { ListCardHor, Nodata, Title },
         computed: {
             ...mapState({
-                itemList: (state: rootState) => state.map.reviewList,
+                itemList: (state: RootState) => state.map.reviewList,
             }),
-
-	        review() {
-		        return this.itemList.content.map(i => {
-		        	let { navWgs84Lat, navWgs84Lon } = i;
-		        	let { displayName, categoryDisplayName, newAddress } = i.poi;
-			        return {
-				        poiId: i.poiId,
-				        reviewAverageCode: i.pointCode,
-				        reviewAverageName: i.pointCodeName,
-				        content: i.content,
-				        history: i.elapsedTimeString,
-                        like: i.likeCount,
-				        displayName,
-				        navWgs84Lon,
-				        navWgs84Lat,
-				        categoryDisplayName,
-				        newAddress,
-			        }
-		        })
-	        }
-        }
+        },
     })
     export default class ReviewList extends Vue {
+    	public itemList: RootState['map']['reviewList'];
+    	public review() {
+		    return this.itemList.content.map((i: any) => {
+			    const { navWgs84Lat, navWgs84Lon } = i;
+			    const { displayName, categoryDisplayName, newAddress } = i.poi;
 
+			    return {
+				    poiId: i.poiId,
+				    reviewAverageCode: i.pointCode,
+				    reviewAverageName: i.pointCodeName,
+				    content: i.content,
+				    history: i.elapsedTimeString,
+				    like: i.likeCount,
+				    displayName,
+				    navWgs84Lon,
+				    navWgs84Lat,
+				    categoryDisplayName,
+				    newAddress,
+			    }
+		    })
+	    }
     }
 </script>
 

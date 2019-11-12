@@ -23,32 +23,32 @@ export default {
     props: {
         label: {
             type: String,
-            default: 'Label Value'
+            default: 'Label Value',
         },
         nickname: {
             type: String,
-            default: '닉네임값'
+            default: '닉네임값',
         },
         intro: {
             type: String,
-            default: '안녕하세요 어디또에 많이 이용해주세요'
+            default: '안녕하세요 어디또에 많이 이용해주세요',
         },
         reviewCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         wishCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         cmn: {
             type: String,
-            default: '0'
+            default: '0',
         },
         characterId: {
             type: String,
-            default: ''
-        }
+            default: '',
+        },
     },
     methods: {
         imgClick(cmn) {
@@ -56,7 +56,7 @@ export default {
         },
         setCharacter(src) {
             try {
-                let path = src || 'c661dbae683e44419baa216e21be1308'
+                const path = src || 'c661dbae683e44419baa216e21be1308'
                 return `https://thumbdev.oditto.com/image/${path}`
             } catch (ex) {
                 return 'http://placehold.it/100x100'
@@ -64,8 +64,8 @@ export default {
         },
         setJoin(cmn) {
             this.$emit('setJoin', cmn);
-        }
-    }
+        },
+    },
 }
 </script>
 

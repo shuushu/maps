@@ -2,12 +2,13 @@ import Vue from 'vue'
 import axios from 'axios'
 
 const instance = axios.create({
-	timeout: 5000
+	timeout: 5000,
 })
 
 
 instance.interceptors.response.use((response: any) => {
 	const { data = {} } = response
+
 	if (response.status === 200) {
 		delete data.status
 		delete data.message
@@ -16,9 +17,10 @@ instance.interceptors.response.use((response: any) => {
 	} else {
 		return null
 	}
-}, (error: any) => {
-	return null
-})
+}, (error) => {
+	$axios.$emit('error', error.response.data);
+	return false;
+});
 
 const $axios = new Vue({
   data: {

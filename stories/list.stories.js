@@ -1,6 +1,6 @@
 import { storiesOf } from '@storybook/vue';
-import { action, decorate, configureActions } from '@storybook/addon-actions';
-import { withKnobs, text, boolean, number } from '@storybook/addon-knobs';
+import { action } from '@storybook/addon-actions';
+import { withKnobs } from '@storybook/addon-knobs';
 
 import ListBasic from '../src/components/ListBasic.vue';
 import ListCardVer from '../src/components/ListCardVer.vue';

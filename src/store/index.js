@@ -18,10 +18,10 @@ const state = {
         title: 'confirm Title',
         func: () => {
             console.log('function object');
-        }
+        },
     },
     characters: [],
-    myCollections: {}
+    myCollections: {},
 };
 const store = {
     state,

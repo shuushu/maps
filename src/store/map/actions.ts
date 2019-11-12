@@ -1,16 +1,10 @@
 import $axios from '@/service/axiosMap'
 import { put, call, take } from 'vuex-saga'
 import { ActionTree } from 'vuex'
-import { rootState } from '@/ts.interface/store.ts'
+import { RootState } from '@/ts.interface/store.ts'
+import { TsGetMyReviewList } from '@/ts.interface/response/wish'
 
-const actions: ActionTree<rootState, any> = {
-    *GET_MEMBER_INFO({}, params) {
-        try {
-
-        } catch (e) {
-	        return false;
-        }
-    },
+const actions: ActionTree<RootState, any> = {
     // 내 장소보기
     *GET_MYPLACE({}, params) {
 	    try {
@@ -18,7 +12,7 @@ const actions: ActionTree<rootState, any> = {
 
 		    if (params.type === 'MYWISH') {
 			    yield put('map/MY_WISH', recom);
-		    } else if(params.type === 'MYCHECK') {
+		    } else if (params.type === 'MYCHECK') {
 			    yield put('map/MY_CHECK', recom);
             } else {
 			    yield put('map/MY_FRIEND', recom);
@@ -48,7 +42,7 @@ const actions: ActionTree<rootState, any> = {
             if (!friend || friend.error) {
                 throw friend.error || new Error()
             }
-            //yield put('SUCCESS');
+            // yield put('SUCCESS');
             yield put('map/GET_FRIEND', friend.subscriptionList);
 
             return  friend
@@ -59,54 +53,54 @@ const actions: ActionTree<rootState, any> = {
     *GET_WISH({}, payload) {
         try {
             yield put('WAIT');
-            let res = yield call($axios.getWish, payload);
+            const res = yield call($axios.getWish, payload);
+
             yield put('SUCCESS');
             // 가고싶어요 지도 레이어 스토어 저장
             yield put('map/GET_WISH', res)
 
             return res
-        } catch(e) {
+        } catch (e) {
             yield put('FAIL');
         }
     },
     *GET_DETAIL({}, payload) {
-        try{
-            yield put('WAIT');
+	    yield put('WAIT');
+	    const res = yield call($axios.detailPOI, payload);
+	    let more = yield call($axios.detailPOImore, payload);
+	    const summary = yield call($axios.getDetailSummary, payload.poi);
 
-            let res = yield call($axios.detailPOI, payload);
-            let more = yield call($axios.detailPOImore, payload);
-	        let summary = yield call($axios.getDetailSummary, payload.poi);
-
-            const result = {
-                info: res,
-                more: more,
-                summary: summary
-            };
-
-            yield put('SUCCESS');
-            yield put('map/GET_DETAIL', result)
-            return result;
-        } catch(e) {
-            yield put('FAIL');
+	    if (more === false) {
+	        more = [];
         }
+
+	    const result = {
+		    info: res,
+		    more,
+		    summary,
+	    };
+
+	    yield put('SUCCESS');
+	    yield put('map/GET_DETAIL', result)
+	    return result;
     },
     *GET_REVIEWS({}, payload) {
         try {
             yield put('WAIT')
 
-            let res = yield call($axios.getMyReviewList, { params: payload })
+            const res = yield call($axios.getMyReviewList, { params: payload })
 
             yield put('SUCCESS')
 
             // 갔다왔어요 지도 레이어 스토어 저장
-	        let c = res.content.map((item: any) => {
-	            let { navWgs84Lon, navWgs84Lat } = item.poi
+	        const c = res.content.map((item: TsGetMyReviewList) => {
+	            const { navWgs84Lon, navWgs84Lat } = item.poi
 		        return { ...item.review, navWgs84Lon, navWgs84Lat }
 	        })
 
             yield put('map/GET_REVIEW', {
                 total: res.totalPages,
-                content: c
+                content: c,
             })
 
             return res
@@ -123,32 +117,6 @@ const actions: ActionTree<rootState, any> = {
         } catch (e) {
 	        yield put('FAIL');
 	        return false;
-        }
-    },
-    *REVIEW_LIKE({}, payload) {
-        try {
-            yield call($axios.reviewLike, payload)
-            return payload
-        } catch (e) {
-            yield put('FAIL')
-        }
-    },
-    *REVIEW_LIKE_DELETE({}, payload) {
-        try {
-            yield call($axios.reviewLikeDel, payload)
-            return payload
-        } catch (e) {
-            yield put('FAIL')
-        }
-    },
-    *REVIEW_LIKE_LIST({}, payload) {
-        try {
-            yield put('WAIT')
-            const res = yield call($axios.reviewLikeList, payload)
-            yield put('SUCCESS')
-            return res
-        } catch (e) {
-            yield put('FAIL')
         }
     },
     *GET_BOARD_LIST({}, payload) {
@@ -170,7 +138,7 @@ const actions: ActionTree<rootState, any> = {
         } catch (e) {
             yield put('FAIL')
         }
-    }
+    },
 }
 
 export default actions

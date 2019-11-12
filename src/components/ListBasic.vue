@@ -28,36 +28,36 @@ export default {
     props: {
         label: {
             type: String,
-            default: 'Label Value'
+            default: 'Label Value',
         },
         nickname: {
             type: String,
-            default: '닉네임값'
+            default: '닉네임값',
         },
         intro: {
             type: String,
-            default: '안녕하세요 어디또에 많이 이용해주세요'
+            default: '안녕하세요 어디또에 많이 이용해주세요',
         },
         reviewCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         wishCount: {
             type: Number,
-            default: 0
+            default: 0,
         },
         friendCmn: {
             type: String,
-            default: '0'
+            default: '0',
         },
         characterId: {
             type: String,
-            default: ''
+            default: '',
         },
         isInterest: {
             type: String,
-            default: 'sdN'
-        }
+            default: 'sdN',
+        },
     },
     methods: {
         imgClick(cmn) {
@@ -77,9 +77,9 @@ export default {
             if (f === 'Y') {
                 this.handleCheck = this.friendCmn
             }
-        }
+        },
     },
-    data () {
+    data() {
         return {
             handleCheck: null,
         }
@@ -88,13 +88,13 @@ export default {
         handleCheck(v) {
             this.$emit('handleCheck', {
                 friendCmn: this.friendCmn,
-                value: v
+                value: v,
             });
-        }
+        },
     },
     created() {
         this.checkedValue(this.isInterest)
-    }
+    },
 }
 </script>
 

@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "strictFunctionTypes": false,
+    "strictNullChecks": false,
     "strictPropertyInitialization": false,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
@@ -18,7 +19,7 @@
       "node"
     ],
     "paths": {
-      "@/*": [ "src/*"]
+      "@/*": [ "src/*" ]
     },
     "lib": [
       "esnext",
@@ -29,7 +30,8 @@
     ]
   },
   "files": [
-    "shims-vue.d.ts"
+    "global-vue.d.ts",
+    "global-proto.d.ts"
   ],
   "include": [
     "src/**/*.ts",

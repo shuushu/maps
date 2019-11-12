@@ -1,4 +1,4 @@
-//"version": "mapbox-gl 0.53.1",
+// "version": "mapbox-gl 0.53.1",
 import mapboxgl from 'mapbox-gl';
 import MapPOP from '@/components/MapPOP.vue'
 import { Vue } from 'vue-property-decorator'
@@ -6,31 +6,23 @@ import $axios from '@/service/axiosMap'
 // 이미지 처리 플러그인
 import Jimp from 'jimp'
 // wish page Interface
-import { tsResourceGeoJson, tsCreateLayer, tsMarker } from '@/ts.interface/map'
-import {async} from "q";
-import {setTimeout} from "timers";
-
-
+import { TsResourceGeoJson, TsCreateLayer, TsMarker } from '@/ts.interface/map'
 
 // image resource
 const imgPin = require('@/assets/ico/network.png');
 
-export class mapAPI {
-	maps!: any;
-	popup!: any;
-	marker!: any;
-	timer!: any;
+export class MapAPI {
+	private maps!: any;
+	private popup!: any;
+	private marker!: any;
+	private timer!: any;
 
 
-	init(dom: any) {
+	public init(dom: any) {
 		mapboxgl.accessToken = 'pk.eyJ1Ijoic2h1dXNodSIsImEiOiJjanN3amoyZHYwZnI0M3lvZHV0MTVwb2FkIn0.x8bYu_ex65VY7kjDcbDumA';
 		this.maps = new mapboxgl.Map({
 			container: dom,
-			//localIdeographFontFamily: "'Noto Sans CJK KR', sans-serif",
 			style: 'http://map.oditto.com/base.json',
-			// style: 'mapbox://styles/mapbox/streets-v11',
-			//style: 'http://183.98.24.70:2018/BASE/Base_v3.json',
-			// style: 'http://120.50.129.198/v1/map/styles/BASE?secure=true',
 			zoom: 12,
 			center: [126.9754552, 37.5538168],
 			minZoom: 6,
@@ -54,7 +46,7 @@ export class mapAPI {
 	}
 
 	// 맵 요소 삭제
-	clearMapLayer(name: string) {
+	public clearMapLayer(name: string) {
 		if (this.maps.hasImage(name)) {
 			this.maps.removeImage(name);
 		}
@@ -71,22 +63,23 @@ export class mapAPI {
 	};
 
 	// BASE맵 요소 클릭 E
-	clickPOI(e: any, app: any) {
-		const features = this.maps.queryRenderedFeatures(e.point),
-			{ poi_id, name } = features[0].properties,
-			{ layout } = features[0].layer,
-			{ coordinates } = features[0].geometry;
+	public clickPOI(e: any, app: any) {
+		const features = this.maps.queryRenderedFeatures(e.point);
+		const { poi_id, name } = features[0].properties;
+		const { layout } = features[0].layer;
+		const { coordinates } = features[0].geometry;
 
 
 		this.clearMapLayer('click');
 
 		if (poi_id) {
-			let type: string = layout['icon-image'],
-				filterStr = ['highway', 'metropolitan', 'seoul_base', 'Feature'],
-				isCheck: boolean = false;
+			let type: string = layout['icon-image'];
+			let isCheck: boolean = false;
 
-			for(let i = 0; i < filterStr.length; i += 1) {
-				if (filterStr[i] === type) {
+			const filterStr = ['highway', 'metropolitan', 'seoul_base', 'Feature'];
+
+			for (const row of  filterStr) {
+				if (row === type) {
 					isCheck = true
 				}
 			}
@@ -104,15 +97,15 @@ export class mapAPI {
 			}
 
 
-			let geoJson = this.createFeature({
+			const geoJson = this.createFeature({
 				prefix: 'click',
 				content: [{
 					poiId: poi_id,
 					navWgs84Lon: coordinates[0],
 					navWgs84Lat: coordinates[1],
 					stickerFile: type,
-					displayName: name
-				}]
+					displayName: name,
+				}],
 			});
 			// ID overwrite
 			geoJson.data.features[0].properties.ID = 'click'
@@ -143,7 +136,7 @@ export class mapAPI {
 			};
 
 			// 무분별한 클릭을 막기위해
-			if(this.timer) {
+			if (this.timer) {
 				clearTimeout(this.timer)
 			}
 			this.timer = setTimeout(() => {
@@ -153,8 +146,8 @@ export class mapAPI {
 						return Math.pow(timeFraction, 2);
 					},
 					draw: (progress: number) => {
-						let value = Number(progress.toFixed(3)),
-							max = 0.5;
+						const max = 0.5;
+						let value = Number(progress.toFixed(3));
 
 						value = value >= max ? max : value;
 
@@ -174,44 +167,35 @@ export class mapAPI {
 					gpsLon: coordinates[0],
 				},
 			}).then((res: any) => {
-				if (!res) {
-					app.$store.dispatch('ALERT', {
-						color: 'warning',
-						icon: 'priority_high',
-						msg: 'POI정보가 없습니다.',
+				if (res) {
+					// create the popup
+					const templetPop = new Vue({
+						components: { MapPOP },
+						template: `<MapPOP v-bind="data" />`,
+						data() {
+							return { data: { ...res, poi: poi_id } }
+						},
+					}).$mount();
+
+					this.popup = new mapboxgl.Popup({ offset: 30 }).setDOMContent(templetPop.$el);
+					this.popup.setLngLat(coordinates).addTo(this.maps);
+
+					this.maps.easeTo({
+						center: coordinates,
 					});
-					return false;
 				}
-
-				// create the popup
-				let templetPop = new Vue({
-					components: { MapPOP },
-					template: `<MapPOP v-bind="data" />`,
-					data() {
-						return { data: { ...res, poi: poi_id } }
-					}
-				}).$mount();
-
-				this.popup = new mapboxgl.Popup({ offset: 30 }).setDOMContent(templetPop.$el);
-				this.popup.setLngLat(coordinates).addTo(this.maps);
-
-				this.maps.easeTo({
-					center: coordinates,
-				});
 			})
-
-			///
 		}
 	};
 
 
-	// 이미지불러와서 레이어그리기
-	loadImage(params: { ID: string | number, src: string; geo: any; layout: any }) {
-		return new Promise(resolve => {
-			let { ID, src, geo, layout } = params
+	// 이미지 불러와서 레이어그리기
+	public loadImage(params: { ID: string | number, src: string; geo: any; layout: any }) {
+		return new Promise((resolve) => {
+			const { ID, src, geo, layout } = params
 
 			this.maps.loadImage(src, (error: any, image: string) => {
-				if(image) {
+				if (image) {
 					this.maps.addImage(ID, image);
 					this.maps.addSource(ID, geo)
 					this.maps.addLayer(layout);
@@ -221,24 +205,24 @@ export class mapAPI {
 		})
 	}
 	// 이미지 흑백으로 바꾸기
-	convertGray(path: string) {
-		return new Promise(resolve => {
-			return Jimp.read(path).then(image => {
+	public convertGray(path: string) {
+		return new Promise((resolve) => {
+			return Jimp.read(path).then((image) => {
 				image.grayscale().getBase64(Jimp.MIME_PNG, (err: any, src: any) => {
 					resolve(src)
 				})
-			}).catch(err => {
+			}).catch((err) => {
 				console.log(err)
 			})
 		})
 	}
 
 	// 레이어만들기 E
-	async createLayer(geo: tsResourceGeoJson, setLayerFunc?: any) {
-		for (let i =0, contSize = geo.data.features.length; i < contSize; i += 1) {
-			let target = geo.data.features[i];
-			let { icon, ID, type } = target.properties;
-			let layout:any = this.getLayer();
+	public async createLayer(geo: TsResourceGeoJson, setLayerFunc?: any) {
+		for (let i = 0, contSize = geo.data.features.length; i < contSize; i += 1) {
+			const target = geo.data.features[i];
+			const { icon, ID, type } = target.properties;
+			const layout: any = this.getLayer();
 			let imgPath;
 
 
@@ -275,18 +259,18 @@ export class mapAPI {
 	}
 
 	// 구성품만들기 E
-	createFeature(res: tsCreateLayer) {
-		let { prefix } = res;
-		let geoJson:any = this.getGeoJson();
+	public createFeature(res: TsCreateLayer) {
+		const { prefix } = res;
+		const geoJson = this.getGeoJson();
 		// 중복체크
 		let temp: string = '';
 
 
 		res.content.forEach((item: any) => {
-			let feature:any = this.getFeature();
-			let layerID = prefix ? `${prefix}_${item.poiId}` : item.poiId;
-			let lon = item.navWgs84Lon || item.centerWgs84Lon;
-			let lat = item.navWgs84Lat || item.centerWgs84Lat
+			const feature: any = this.getFeature();
+			const layerID = prefix ? `${prefix}_${item.poiId}` : item.poiId;
+			const lon = item.navWgs84Lon || item.centerWgs84Lon;
+			const lat = item.navWgs84Lat || item.centerWgs84Lat;
 
 			if (temp === layerID) {
 				return;
@@ -309,28 +293,25 @@ export class mapAPI {
 
 
 	// 마커
-	createMarker(data: tsMarker) {
-		let { poi, size, icon } = data;
+	public createMarker(data: TsMarker) {
+		const { poi, size, icon } = data;
 		const el = document.createElement('div');
 		const imgs = document.createElement('img');
 		const ani1 = document.createElement('span');
 		const ani2 = document.createElement('span');
-		let path;
-		//const path = require('@/assets/ico/network.png');
+
 		try {
-			path = require(`@/assets/sticker/c_${icon.substr(2)}.png`);
+			imgs.src = require(`@/assets/sticker/c_${icon.substr(2)}.png`);
 		} catch (e) {
-			path = imgPin;
+			imgs.src = imgPin;
+			imgs.style.width = '34px'
 		}
 
 
 		el.className = 'marker';
-		//imgs.className = 'bounceInUp';
 		ani1.className = 'ani1';
 		ani2.className = 'ani2';
 
-		imgs.src = path;
-		//el.style.backgroundImage = `url(${path})`;
 		el.style.width = `${size}px`;
 		el.style.height = `${size}px`;
 		el.appendChild(imgs);
@@ -348,38 +329,38 @@ export class mapAPI {
 	}
 
 	//
-	getGeoJson() {
+	public getGeoJson() {
 		return {
 			type: 'geojson',
 			data: {
 				type: 'FeatureCollection',
-				features: [],
-			}
+				features: [] as any[],
+			},
 		}
 	}
 
-	getLayer() {
+	public getLayer() {
 		return {
 			id: 'pk',
 			source: 'pk',
 			type: 'symbol',
 			layout: this.getLayout(),
-			//filter: ['==', 'ID', ['get', 'ID']]
+			// filter: ['==', 'ID', ['get', 'ID']]
 		}
 	}
 
-	getFeature() {
+	public getFeature() {
 		return {
 			type: 'Feature',
 			properties: {},
 			geometry: {
 				type: 'Point',
 				coordinates: [ 0, 0 ],
-			}
+			},
 		}
 	}
 
-	getLayout() {
+	public getLayout() {
 		return {
 			'icon-image': ['get', 'ID'],
 			'icon-anchor': 'bottom',
@@ -393,4 +374,3 @@ export class mapAPI {
 	}
 }
 
-export {}

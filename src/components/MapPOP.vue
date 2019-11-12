@@ -30,36 +30,36 @@ export default {
     props: {
         displayName: {
             type: String,
-            default: 'storeName'
+            default: 'storeName',
         },
         categoryDisplayName: {
             type: String,
-            default: '분류'
+            default: '분류',
         },
         phoneNumber: {
             type: String,
-            default: '032-111-1111'
+            default: '032-111-1111',
         },
         newAddress: {
             type: String,
-            default: '서울시 중구 소월로'
+            default: '서울시 중구 소월로',
         },
         wishCount: {
             type: Number,
-            default: 32
+            default: 32,
         },
         reviewCount: {
             type: Number,
-            default: 322
+            default: 322,
         },
         poi: {
             type: Number,
-            default: 0
+            default: 0,
         },
         eventBus: {
             type: String,
-            default: 'none'
-        }
+            default: 'none',
+        },
     },
     methods: {
         clickHeart(f) {
@@ -79,8 +79,8 @@ export default {
                 // 컴포넌트로 이벤트 전파될 때
                 this.$emit('clickFlag', f);
             }
-        }
-    }
+        },
+    },
 }
 </script>
 

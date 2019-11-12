@@ -10,7 +10,7 @@ Vue.prototype.$axios = axiosMap;
 Vue.config.productionTip = false;
 Vue.use(VuexSaga, { store });
 Vue.use(Vuetify);
-//const MYUID = '108100000001923'
+// const MYUID = '108100000001923'
 const APP = new Vue({
     store,
     router,

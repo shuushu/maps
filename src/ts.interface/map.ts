@@ -1,7 +1,7 @@
 // MAP API에서 사용하는 인터페이스
 // The GeoJSON Specification (RFC 7946)
 // geo 표준 규격
-export interface tsFeature {
+export interface TsFeature {
 	type: string;
 	properties: {
 		ID: string | number;
@@ -18,18 +18,18 @@ export interface tsFeature {
 
 // https://docs.mapbox.com/mapbox-gl-js/style-spec/#sources-geojson
 // 맵레이어 그리기 큰틀
-export interface tsResourceGeoJson {
+export interface TsResourceGeoJson {
 	type: string;
 	data: {
 		type: string;
-		features: tsFeature [];
+		features: TsFeature [];
 	}
 }
 
 
 // https://docs.mapbox.com/mapbox-gl-js/style-spec/#layers
 // 맵레이어 옵션
-export interface tsLayers {
+export interface TsLayers {
 	'icon-anchor'?: string;
 	'icon-size'?: number;
 	'text-field'?: any;
@@ -40,7 +40,7 @@ export interface tsLayers {
 	'icon-image'?: string;
 }
 
-interface featureResource {
+interface FeatureResource {
 	'poiId': number
 	'navWgs84Lon': number
 	'navWgs84Lat': number
@@ -48,20 +48,13 @@ interface featureResource {
 	'displayName': string
 }
 
-export interface tsCreateLayer {
+export interface TsCreateLayer {
 	prefix: string;
-	content: featureResource [];
+	content: any [];
 }
 
-export interface tsMarker {
-	poi: number [];
+export interface TsMarker {
+	poi: string [];
 	icon: string;
 	size: number;
-}
-
-// loadimage interface @/common/map.ts
-export interface tsLoadImage {
-	path: string;
-	id?: string;
-	data: any;
 }

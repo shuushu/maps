@@ -9,15 +9,17 @@
     "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "dependencies": {
+    "@/components": "latest",
     "@babel/core": "^7.6.0",
     "add": "^2.0.6",
     "axios": "^0.18.1",
     "babel-loader": "^8.0.6",
     "core-js": "^2.6.5",
     "jimp": "^0.6.4",
+    "mapbox-gl": "^0.53.1",
     "vue": "^2.6.10",
     "vue-loader": "^15.7.1",
-    "mapbox-gl": "^0.53.1",
+    "vue-owl-carousel2": "^2.0.7",
     "vue-property-decorator": "^8.2.2",
     "vue-router": "^3.0.3",
     "vuetify": "^1.5.12",

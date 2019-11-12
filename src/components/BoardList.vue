@@ -1,97 +1,113 @@
 <template>
     <div>
-        <div v-if="boardName === 'notice'">
-            <div class="board-wrap">
-                <div class="board-list" v-for="list in boardList.content" :key="list.noticeId" @click="goDetail(list.noticeId)">
-                    <span class="category" v-if="list.headTitle">{{ list.headTitle }}</span>
-                    <span class="tlt">{{ list.title }}</span>
-                    <span class="date">{{ list.createDate }}</span>
-                </div>
-            </div>
-            <div class="text-xs-center">
-                <v-pagination
-                        color="pink lighten-1"
-                        v-model="paging"
-                        :length="boardList.totalPages"
-                        :total-visible="20"
-                ></v-pagination>
+        <div class="board-wrap">
+            <div class="board-list" v-for="list in boarderList.content" :key="`${$route.params.name}${list.id}`" @click="goDetail(list.id)">
+                <span class="category" v-if="list.headTitle">{{ list.headTitle }}</span>
+                <span class="category">{{ list.category }}</span>
+                <span class="tlt">{{ list.title }}</span>
+                <span class="date">{{ list.createDate }}</span>
             </div>
         </div>
-        <div v-else-if="boardName === 'faq'">
-            <div class="board-wrap">
-                <div class="board-list" v-for="list in boardList.content" :key="list.faqId" @click="goDetail(list.faqId)">
-                    <span class="category">{{ list.category }}</span>
-                    <span class="tlt">{{ list.title }}</span>
-                    <span class="date">{{ list.createDate }}</span>
-                </div>
-            </div>
-            <div class="text-xs-center">
-                <v-pagination
-                        color="pink lighten-1"
-                        v-model="paging"
-                        :length="boardList.totalPages"
-                        :total-visible="20"
-                ></v-pagination>
-            </div>
+        <div class="text-xs-center">
+            <v-pagination
+                    color="pink lighten-1"
+                    v-model="paging"
+                    :length="boarderList.totalPages"
+                    :total-visible="20"
+            ></v-pagination>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-    import { Component, Prop, Vue } from "vue-property-decorator"
+    import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 
-    @Component({
-        data() {
-            return {
-                boardList: {},
-            }
-        },
-        watch: {
-            '$route' (to) {
-                // 경로 변경에 반응하여...
-                if (to.params.name) {
-                    this.getBoardList()
-                }
-            },
-        },
-    })
+    interface ItemType {
+	    headTitle?: string;
+	    title: string;
+	    createDate: string;
+	    isImportant: string;
+	    viewCount: number;
+	    category: string;
+	    id: number;
+    }
+
+    interface ResponseType {
+	    content: ItemType [];
+	    totalPages: number;
+    }
+
+    @Component({})
     export default class BoardList extends Vue {
+	    public boarderList: ResponseType = {
+		    content: [],
+		    totalPages: 1,
+	    }
+
+	    @Prop() public boardName: string;
+	    @Watch('$route', { immediate: true, deep: true })
+
+        public routeUpdate() {
+		    this.getBoardList()
+	    }
+
         // PageBtn
         get paging() {
             return Number(this.$route.query.page) || 1
         }
         set paging(val: any) {
-            let params = this.setRouterParams({
-                id: 'page',
-                value: val
-            });
-            this.$router.push(params)
+	        const data = {
+		        name: this.$route.name,
+		        query: {
+			        id: 'page',
+			        value: val,
+                },
+	        };
+
+            this.$router.push(data)
         }
 
-        @Prop() boardName: string
-
-        getBoardList(): void {
+        private getBoardList(): void {
             const data = {
                 boardName: this.boardName,
-                osType: 'ANDROID'
+                osType: 'ANDROID',
             }
-            this.$run('map/GET_BOARD_LIST', data)
-                .then((res: any) => {
-                    this.boardList = res
-                }).catch(err => {
-                console.log(err)
+
+            this.$run('map/GET_BOARD_LIST', data).then((res: any) => {
+	            const temp = res.content.map((i: any) => {
+            		const { headTitle, title, createDate, category, isImportant, viewCount, noticeId, faqId } = i;
+            		let id = 0;
+
+                    if (noticeId) {
+	                    id = noticeId
+                    } else {
+                    	id = faqId
+                    }
+
+            		return { headTitle, title, createDate, category, isImportant, viewCount, id }
+            	})
+
+                this.boarderList = {
+	            	content: temp,
+	                totalPages: res.totalPages,
+                }
             })
         }
 
-        goDetail(id: number): void {
-            // console.log(id, this.$route.params)
-            this.$router.push({name:'boarddetail', params: {id:id}})
+	    private goDetail(id: number): void {
+	    	const routeParams = {
+	    		name: 'boardDetail',
+                params: {
+	    			id: String(id),
+	    		},
+	    	}
+
+            this.$router.push(routeParams)
         }
 
-        constructor() {
-            super()
-            this.getBoardList()
-        }
+	    private created() {
+		    this.getBoardList()
+	    }
     }
 </script>
 

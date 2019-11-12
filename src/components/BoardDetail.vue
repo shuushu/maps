@@ -6,36 +6,30 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop, Vue } from "vue-property-decorator"
+    import { Component, Vue, Prop } from 'vue-property-decorator'
 
-    @Component({
-        data() {
-            return {
-                boardDetail: {},
-            }
-        },
-    })
+    @Component({})
     export default class BoardDetail extends Vue {
-        @Prop() boardName: string
-        @Prop() detailId: number
+	    @Prop() public boardName: string;
+	    @Prop() public detailId: string;
 
-        getBoardDetail(): void {
-            const data = {
-                boardName: this.boardName,
-                id: this.detailId,
-            }
-            this.$run('map/GET_BOARD_DETAIL', data)
-                .then((res: any) => {
-                    this.boardDetail = res
-                }).catch(err => {
-                console.log(err)
+        public boardDetail: { title: string; content: string } = {
+	        title: '',
+	        content: '',
+        }
+
+        private getBoardDetail(): void {
+            this.$run('map/GET_BOARD_DETAIL', {
+	            boardName: this.boardName,
+	            id: this.detailId,
+            }).then((res: any) => {
+            	this.boardDetail = res
             })
         }
 
-        constructor() {
-            super()
-            this.getBoardDetail()
-        }
+	    private created() {
+		    this.getBoardDetail()
+	    }
     }
 </script>
 

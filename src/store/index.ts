@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex, { StoreOptions } from 'vuex'
-import { rootState } from '@/ts.interface/store.ts'
+import { RootState } from '@/ts.interface/store.ts'
 import actions from './actions'
 import mutations from './mutations'
 
@@ -8,7 +8,7 @@ import { map } from './map'
 
 Vue.use(Vuex)
 
-const state: rootState = {
+const state: RootState = {
     isAlert: {
         color: 'red',
         icon: 'warning',
@@ -22,13 +22,13 @@ const state: rootState = {
         title: 'confirm Title',
         func: () => {
             console.log('function object')
-        }
+        },
     },
 	characters: [],
-	myCollections: {}
+	myCollections: {},
 }
 
-const store: StoreOptions<rootState> = {
+const store: StoreOptions<RootState> = {
     state,
     actions,
     mutations,
@@ -37,4 +37,4 @@ const store: StoreOptions<rootState> = {
     },
 }
 
-export default new Vuex.Store<rootState>(store)
+export default new Vuex.Store<RootState>(store)

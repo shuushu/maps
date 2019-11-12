@@ -8,18 +8,18 @@
 <script lang="ts">
     import { Component, Vue } from 'vue-property-decorator'
     import { mapState } from 'vuex'
-    import { rootState } from '@/ts.interface/store.ts'
-    import BoardList from '@/components/BoardList'
-    import Title from "@/components/Title";
+    import { RootState } from '@/ts.interface/store.ts'
+    import BoardList from '@/components/BoardList.vue'
+    import Title from '@/components/Title.vue'
 
     @Component({
         components: {
-            BoardList, Title
+            BoardList, Title,
         },
         computed: {
             ...mapState({
-                isAlert: (state: rootState) => state.isAlert,
-                isLoading: (state: rootState) => state.isLoading,
+                isAlert: (state: RootState) => state.isAlert,
+                isLoading: (state: RootState) => state.isLoading,
             }),
             boardName() {
                 return this.$route.params.name === 'notice' ? '공지사항' : '도움말'

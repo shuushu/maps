@@ -1,4 +1,4 @@
-import { put } from "vuex-saga";
+import { put } from 'vuex-saga';
 let popTimer;
 const actions = {
     ALERT: ({ commit }, payload) => {
@@ -15,7 +15,7 @@ const actions = {
     },
     *SUCCESS() {
         yield put('SUCCESS');
-    }
+    },
 };
 export default actions;
 //# sourceMappingURL=actions.js.map

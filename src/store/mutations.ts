@@ -1,7 +1,7 @@
 import { MutationTree } from 'vuex'
-import { rootState } from '@/ts.interface/store.ts'
+import { RootState } from '@/ts.interface/store.ts'
 
-const mutations: MutationTree<rootState> = {
+const mutations: MutationTree<RootState> = {
     ALERT_OPEN(state, payload) {
         state.isAlert = { ...payload, show: true }
     },
@@ -25,8 +25,7 @@ const mutations: MutationTree<rootState> = {
     },
     MY_COLLECTIONS(state, payload) {
 	    state.myCollections = payload
-    }
-
+    },
 }
 
 export default mutations

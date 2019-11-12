@@ -17,60 +17,61 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { mapState } from 'vuex'
-import { rootState } from '@/ts.interface/store.ts'
+import { RootState } from '@/ts.interface/store.ts'
+import { MemberInfo } from '@/ts.interface/response/subscription.ts'
 
-
-import { mapbox } from '@/common/map.ts'
-import Title from "@/components/Title";
-import ListCardVer from "../components/ListCardVer";
+import Title from '@/components/Title.vue';
+import ListCardVer from '@/components/ListCardVer.vue';
 
 
 @Component({
-	components: {ListCardVer, Title },
+	components: { ListCardVer, Title },
 	computed: {
 		...mapState({
-			myCollections: (state: rootState) => state.myCollections,
-			recList: (state: rootState) => state.map.recommend,
-			characters: (state: rootState) => state.characters,
+			myCollections: (state: RootState) => state.myCollections,
+			recList: (state: RootState) => state.map.recommend,
+			characters: (state: RootState) => state.characters,
 		}),
 	},
 	methods: {
-		setCharacterImg(id) {
-			return this.characters[id.characterId].faceColor
-		},
-		setJoin(data: string) {
-			this.$axios.joinSubscript(data)
-			this.$store.dispatch('ALERT', {
-				color: 'warning',
-				icon: 'check_circle',
-				msg: `구독 신청 하였습니다.`,
-			});
-			this.layerReset();
-			this.$router.push({ name: 'subdescript', params: { key: 'reload'} } )
-		},
-		layerReset() {
-			for (let key in this.myCollections) {
+
+	},
+    created() {
+	    this.$run('map/GET_RECOMMEND');
+    },
+})
+
+export default class Recommend extends Vue<RootState> {
+	public characters: RootState['characters'];
+
+	private setCharacterImg(id: MemberInfo) {
+		return this.characters[id.characterId].faceColor
+	}
+	private setJoin(data: string) {
+		this.$axios.joinSubscript(data)
+		this.$store.dispatch('ALERT', {
+			color: 'warning',
+			icon: 'check_circle',
+			msg: `구독 신청 하였습니다.`,
+		});
+		this.layerReset();
+		this.$router.push({ name: 'subdescript', params: { key: 'reload'} } )
+	}
+	private layerReset() {
+		for (const key in this.myCollections) {
+			if (this.myCollections[key].length > 0) {
 				this.myCollections[key].forEach((item: string) => {
 					this.$mapbox.clearMapLayer(item)
-					this.$mapbox.maps.off('click', item, this.mapMove)
 				})
 			}
 		}
 	}
-})
-
-export default class Recommend extends Vue {
-    public created() {
-	    this.$run('map/GET_RECOMMEND');
-    }
-    public imgClick(cmn) {
-	    this.$router.push({
-            name: 'userdetail',
-            params: {
-	            cmn: cmn
-            }
-        })
-    }
+	private imgClick(cmn: string) {
+		this.$router.push({
+			name: 'userdetail',
+			params: { cmn },
+		})
+	}
 }
 </script>
 

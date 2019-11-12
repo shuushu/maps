@@ -28,7 +28,7 @@ export default {
     // POI 상세속성조회(더보기)
     detailPOImore(params: any) {
         const { poi } = params;
-        return $axios.get(`/map/v1/pois/${poi}/attr`, params)
+        return $axios.get(`/map/v1/pois/${poi}/attr`, params) || true
     },
 	// 상세
 	clickPoiDetail(params: any) {
@@ -48,37 +48,33 @@ export default {
 		    return $axios.get(`/map/v1/wishes/${data.targetCmn}`, {
 		    	params: {
 		    		data,
-				    'x-skcomms-cmn': data.targetCmn
-			    }
+				    'x-skcomms-cmn': data.targetCmn,
+			    },
 		    })
 	    } else {
-		    return $axios.get(`/map/v1/wishes`, data)
+		    return $axios.get(`/map/v1/wishes`, { params: data })
 	    }
 	},
 	// 등록
 	addWish(poi: number) {
 		return $axios.post(`/map/v1/wishes/${poi}`, {
-			poiId : poi
+			poiId : poi,
 		})
 	},
 	// 삭제
 	deleteWish(poi: string) {
 		return $axios.delete(`/map/v1/wishes/${poi}`, {
-			poiId : poi
+			poiId : poi,
 		})
 	},
 
 	/*
 	 * 구독
 	 */
-	// 추천리스트
-	getRecommendation(params: any) {
-		return $axios.get(`/map/v1/wishes`, params)
-	},
 	// 신청
 	joinSubscript(cmn: string) {
 		return $axios.post(`/user/v1/subscription`, {
-			friendCmn: cmn
+			friendCmn: cmn,
 		})
 	},
 	// 멤버 가져오기
@@ -106,26 +102,11 @@ export default {
     // 갔다왔어요
 	// 목록
     getMyReviewList(data: any) {
-        if(data.params.targetCmn) {
+        if (data.params.targetCmn) {
             return $axios.get(`/map/v1/reviews/${data.params.targetCmn}`, data)
         } else {
             return $axios.get(`/map/v1/reviews`, data)
         }
-    },
-	// 리뷰 좋아요
-    reviewLike(data: any) {
-        const { poiId, reviewId } = data
-        return $axios.post(`/map/v1/pois/${poiId}/reviews/${reviewId}/like`, data)
-    },
-    // 리뷰 좋아요 취소
-    reviewLikeDel(data: any) {
-        const { poiId, reviewId } = data
-        return $axios.delete(`/map/v1/pois/${poiId}/reviews/${reviewId}/like`, data)
-    },
-    // 리뷰 좋아요 사용자 리스트
-    reviewLikeList(data: any) {
-        const { poiId, reviewId } = data
-        return $axios.get(`/map/v1/pois/${poiId}/reviews/${reviewId}/likes`, data)
     },
 	// 공지사항
     getBoardList(data: any) {
@@ -135,5 +116,5 @@ export default {
 	getBoardDetail(data: any) {
 	    const { boardName, id } = data
 		return $axios.get(`/bizcommon/v1/${boardName}/${id}`, data)
-	}
+	},
 }

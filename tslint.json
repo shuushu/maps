@@ -19,6 +19,8 @@
     "no-consecutive-blank-lines": false,
     "max-line-length": false,
     "no-console": false,
+    "no-var-requires": false,
+    "no-string-literal": false,
     "no-shadowed-variable": false,
     "variable-name": [
       true,

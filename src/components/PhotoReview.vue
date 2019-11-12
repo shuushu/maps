@@ -27,15 +27,15 @@
         props: {
             photoCount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             photos: {
                 type: Array,
-                default: []
+                default: [],
             },
             tags: {
                 type: Array,
-                default: []
+                default: [],
             },
         },
         methods: {
@@ -47,8 +47,8 @@
             },
             getPath(path) {
                 return `https://thumbdev.oditto.com/image/${path}`
-            }
-        }
+            },
+        },
     }
 </script>
 
@@ -79,7 +79,6 @@
             justify-content: space-between;
             .item {
                 position: relative;
-
                 margin: 0 0 10px 0;
                 &::before{
                     content: '';
@@ -94,6 +93,7 @@
                     box-sizing: border-box;
                     border-radius: 10px;
                 }
+
                 img{
                     border-radius: 10px;
                     width: 110px;

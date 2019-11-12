@@ -1,9 +1,9 @@
 import { ActionTree } from 'vuex'
-import { rootState } from '@/ts.interface/store.ts'
-import {put} from "vuex-saga";
+import { RootState } from '@/ts.interface/store.ts'
+import { put } from 'vuex-saga';
 
 let popTimer!: any;
-const actions: ActionTree<rootState, any> = {
+const actions: ActionTree<RootState, any> = {
     ALERT: ({ commit }, payload) => {
         commit('ALERT_OPEN', payload)
 
@@ -20,7 +20,7 @@ const actions: ActionTree<rootState, any> = {
 	},
 	*SUCCESS() {
 		yield put('SUCCESS');
-	}
+	},
 }
 
 export default actions

@@ -12,16 +12,16 @@
         props: {
             review: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             wish: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             uniqq: {
                 type: String,
-                default: '0'
-            }
+                default: '0',
+            },
         },
         methods: {
             clickHeart(f) {
@@ -29,8 +29,8 @@
             },
             clickFlag(f) {
                 this.$emit('clickFlag', f);
-            }
-        }
+            },
+        },
     }
 </script>
 
