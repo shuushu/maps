@@ -1,4 +1,7 @@
-# oditto-ts
+# 지도공유서비스
+See [https://www.youtube.com/watch?v=bInfW744NuY&feature=youtu.be]
+
+typescript, vue, mapbox
 
 ## Project setup
 ```
@@ -23,7 +26,3 @@ npm run test
 ### Lints and fixes files
 ```
 npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
